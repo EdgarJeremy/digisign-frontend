@@ -8,16 +8,19 @@ export default class New extends React.Component {
             title: '',
             type: '',
             file: null,
-            category_id: ''
+            category_id: '',
+            flow_id: '',
         },
         categories: [],
+        flows: [],
         ready: false,
         loading: false
     }
     async componentDidMount() {
         const { models } = this.props;
-        const categories = await models.Category.collection({ attributes: ['id', 'name', 'type'] });
-        this.setState({ ready: true, categories: categories.rows });
+        const categories = await models.Category.collection({ attributes: ['id', 'name'] });
+        const flows = await models.Flow.collection({ attributes: ['name'] });
+        this.setState({ ready: true, categories: categories.rows, flows: flows.rows });
     }
     updateForm(key, val) {
         const { form } = this.state;
@@ -41,7 +44,8 @@ export default class New extends React.Component {
                 title: '',
                 type: '',
                 file: null,
-                category_id: ''
+                category_id: '',
+                flow_id: ''
             }
         });
         Alert.success(`Surat berhasil disimpan`);
@@ -49,19 +53,19 @@ export default class New extends React.Component {
     findCategory(id) {
         const { categories } = this.state;
         for (let i = 0; i < categories.length; i++) {
-            if(categories[i].id == id) return categories[i];
+            if (categories[i].id == id) return categories[i];
         }
         return;
     }
     render() {
-        const { form, ready, categories, loading } = this.state;
+        const { form, ready, categories, flows, loading } = this.state;
         form.category = this.findCategory(form.category_id);
         return (
             <div className="contain" style={{ padding: 14 }}>
                 <h3>Buat Surat</h3>
                 <div className="panel">
                     {ready ? <StepWizard nav={<Nav />}>
-                        <Step1 formData={form} updateForm={this.updateForm.bind(this)} />
+                        <Step1 formData={form} flows={flows} updateForm={this.updateForm.bind(this)} />
                         <Step2 formData={form} categories={categories} updateForm={this.updateForm.bind(this)} />
                         <Step3 formData={form} updateForm={this.updateForm.bind(this)} />
                         <Step4 formData={form} updateForm={this.updateForm.bind(this)} />
@@ -76,7 +80,7 @@ export default class New extends React.Component {
 const Nav = (props) => {
     return (
         <Steps small current={props.currentStep - 1}>
-            <Steps.Item style={{ cursor: 1 <= props.currentStep ? 'pointer' : 'not-allowed' }} title="Tipe Surat" description="Surat biasa atau produk hukum" onClick={() => 1 < props.currentStep && props.goToStep(1)} />
+            <Steps.Item style={{ cursor: 1 <= props.currentStep ? 'pointer' : 'not-allowed' }} title="Alur Surat" description="Pilih alur surat" onClick={() => 1 < props.currentStep && props.goToStep(1)} />
             <Steps.Item style={{ cursor: 2 <= props.currentStep ? 'pointer' : 'not-allowed' }} title="Kategori Surat" description="Kategori surat sesuai tipe" onClick={() => 2 < props.currentStep && props.goToStep(2)} />
             <Steps.Item style={{ cursor: 3 <= props.currentStep ? 'pointer' : 'not-allowed' }} title="Judul Surat" description="Judul surat sesuai maksud" onClick={() => 3 < props.currentStep && props.goToStep(3)} />
             <Steps.Item style={{ cursor: 4 <= props.currentStep ? 'pointer' : 'not-allowed' }} title="Upload File" description="Softcopy surat dalam bentuk file ms-word (.docx)" onClick={() => 4 < props.currentStep && props.goToStep(4)} />
@@ -89,20 +93,13 @@ const Step1 = (props) => {
     return (
         <div className="wizard-step">
             <div className="wizard-question">
-                Apa tipe surat yang akan dibuat?
+                Pilih alur surat
             </div>
             <div className="wizard-form">
-                <ButtonGroup>
-                    <Button appearance={props.formData.type === 'Reguler' ? 'primary' : 'ghost'} size="lg" onClick={() => {
-                        props.updateForm('type', 'Reguler');
-                    }}><Icon icon="file" /> Surat Biasa</Button>
-                    <Button appearance={props.formData.type === 'Hukum' ? 'primary' : 'ghost'} size="lg" onClick={() => {
-                        props.updateForm('type', 'Hukum');
-                    }}><Icon icon="gavel" /> Produk Hukum</Button>
-                </ButtonGroup>
+                <SelectPicker value={props.formData.flow_id} placeholder="Pilih alur" block data={props.flows.map((c) => ({ label: `${c.name} (${c.flow_chains.map((c) => c.role.name).join(' → ')})`, value: c.id }))} onChange={(v) => props.updateForm('flow_id', v)} />
             </div>
             <div className="wizard-action">
-                <IconButton disabled={!props.formData.type} onClick={props.nextStep} icon={<Icon icon="angle-right" />} appearance="primary" size="lg" circle />
+                <IconButton disabled={!props.formData.flow_id} onClick={props.nextStep} icon={<Icon icon="angle-right" />} appearance="primary" size="lg" circle />
             </div>
         </div>
     )
@@ -114,7 +111,7 @@ const Step2 = (props) => {
                 Apa kategori surat yang akan dibuat?
             </div>
             <div className="wizard-form">
-                <SelectPicker value={props.formData.category_id} placeholder="Pilih kategori" block data={props.categories.filter((c) => c.type === props.formData.type).map((c) => ({ label: c.name, value: c.id }))} onChange={(v) => props.updateForm('category_id', v)} />
+                <SelectPicker value={props.formData.category_id} placeholder="Pilih kategori" block data={props.categories.map((c) => ({ label: c.name, value: c.id }))} onChange={(v) => props.updateForm('category_id', v)} />
             </div>
             <div className="wizard-action">
                 <IconButton onClick={props.previousStep} icon={<Icon icon="angle-left" />} appearance="primary" size="lg" circle />

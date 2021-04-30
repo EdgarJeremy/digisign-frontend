@@ -28,13 +28,13 @@ export default class Rejected extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
-            attributes: ['title', 'type', 'position', 'category_id', 'division_id', 'created_at'],
+            attributes: ['title', 'position_id'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
             }, {
                 model: 'Division',
-                attributes: ['id', 'name', 'asst']
+                attributes: ['id', 'name']
             }, {
                 model: 'Log',
                 attributes: ['id', 'note'],
@@ -42,6 +42,10 @@ export default class Rejected extends React.Component {
                     model: 'User',
                     attributes: ['id', 'name']
                 }]
+            }, {
+                model: 'Role',
+                as: 'Position',
+                attributes: ['id', 'name']
             }],
             offset: (activePage * displayLength) - displayLength,
             limit: displayLength,
@@ -49,7 +53,7 @@ export default class Rejected extends React.Component {
                 title: {
                     $iLike: `%${keyword}%`
                 },
-                position: user.type,
+                position_id: user.role_id,
                 division_id: user.division_id,
                 number: null
             },
@@ -132,14 +136,6 @@ export default class Rejected extends React.Component {
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Judul</Table.HeaderCell>
                             <Table.Cell dataKey="title" />
-                        </Table.Column>
-                        <Table.Column flexGrow={1}>
-                            <Table.HeaderCell>Tipe</Table.HeaderCell>
-                            <Table.Cell>
-                                {(row) => {
-                                    return row.type === 'Reguler' ? 'Surat Biasa' : 'Produk Hukum';
-                                }}
-                            </Table.Cell>
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Kategori</Table.HeaderCell>

@@ -46,6 +46,7 @@ export default class Signer extends React.Component {
         this.setState({ region: regions[0] });
     }
     async onSign() {
+        const { p12password } = this.props;
         const { letter, page, region } = this.state;
         this.setState({ loading: true });
         const x = (region.x / 100) * this.img.width;
@@ -61,7 +62,8 @@ export default class Signer extends React.Component {
                     (this.img.height - y) - h,
                     w,
                     h
-                ]
+                ],
+                p12password
             }
         });
         if (res.headers['x-access-token'] && res.headers['x-refresh-token']) {

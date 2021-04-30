@@ -12,7 +12,8 @@ export default class Inbox extends React.Component {
         letters: null,
         loading: true,
         revisionFiles: {},
-        toApprove: null
+        toApprove: null,
+        p12password: ''
     }
     async componentDidMount() {
         await this.fetch();
@@ -28,13 +29,16 @@ export default class Inbox extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
-            attributes: ['title', 'type', 'position'],
+            attributes: ['title', 'position_id'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
             }, {
                 model: 'Division',
-                attributes: ['id', 'name', 'asst']
+                attributes: ['id', 'name']
+            }, {
+                model: 'User',
+                attributes: ['id', 'name']
             }],
             offset: (activePage * displayLength) - displayLength,
             limit: displayLength,
@@ -42,7 +46,7 @@ export default class Inbox extends React.Component {
                 title: {
                     $iLike: `%${keyword}%`
                 },
-                position: user.type,
+                position_id: user.role_id,
                 number: null
             },
             order: [['created_at', 'desc']]
@@ -58,18 +62,10 @@ export default class Inbox extends React.Component {
     async onApprove(item) {
         const { user, models } = this.props;
         const { revisionFiles } = this.state;
-        let nextPos;
-        if (item.position === 'Bagian Umum' || item.position === 'Bagian Hukum') {
-            nextPos = item.division.asst;
-        } else if (['Asisten 1', 'Asisten 2', 'Asisten 3'].indexOf(item.position) !== -1) {
-            nextPos = 'Sekretaris Daerah';
-        } else {
-            nextPos = structure[structure.indexOf(item.position) + 1];
-        }
-        if (nextPos) {
+        if (!item.last) {
             const confirmed = window.confirm(`Anda yakin akan mengapprove?`);
             if (confirmed) {
-                await item.update({ position: nextPos, file: revisionFiles[`file-${item.id}`] });
+                await item.update({ position_id: 'next', file: revisionFiles[`file-${item.id}`] });
                 await models.Log.create({
                     type: 'APPROVAL',
                     note: '',
@@ -79,14 +75,17 @@ export default class Inbox extends React.Component {
                 await this.fetch();
             }
         } else {
-            this.setState({ toApprove: item });
+            let p12password = prompt('Masukkan password tanda tangan elektronik untuk melanjutkan');
+            if (p12password) {
+                this.setState({ toApprove: item, p12password });
+            }
         }
     }
     async onReject(item) {
         const { user, models } = this.props;
         const reason = window.prompt(`Masukkan alasan penolakan`);
         if (reason !== null) {
-            await item.update({ position: 'SKPD' });
+            await item.update({ position: 'previous' });
             await models.Log.create({
                 type: 'REJECTION',
                 note: reason,
@@ -115,7 +114,7 @@ export default class Inbox extends React.Component {
         }
     }
     render() {
-        const { keyword, letters, loading, activePage, displayLength, toApprove } = this.state;
+        const { keyword, letters, loading, activePage, displayLength, toApprove, p12password } = this.state;
         const { user } = this.props;
         const { REACT_APP_API_HOST, REACT_APP_API_PORT } = process.env;
         return (
@@ -142,15 +141,11 @@ export default class Inbox extends React.Component {
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Pemohon</Table.HeaderCell>
-                            <Table.Cell dataKey="division.name" />
+                            <Table.Cell dataKey="user.name" />
                         </Table.Column>
                         <Table.Column flexGrow={1}>
-                            <Table.HeaderCell>Tipe</Table.HeaderCell>
-                            <Table.Cell>
-                                {(row) => {
-                                    return row.type === 'Reguler' ? 'Surat Biasa' : 'Produk Hukum';
-                                }}
-                            </Table.Cell>
+                            <Table.HeaderCell>Dinas</Table.HeaderCell>
+                            <Table.Cell dataKey="division.name" />
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Kategori</Table.HeaderCell>
@@ -213,7 +208,7 @@ export default class Inbox extends React.Component {
                         <Modal.Title>Approve dan Tanda tangani</Modal.Title>
                     </Modal.Header>
                     <Modal.Body style={{ maxHeight: 'auto' }}>
-                        {toApprove && <Signer models={this.props.models} letter={toApprove} user={this.props.user} onSuccess={() => {
+                        {toApprove && <Signer models={this.props.models} p12password={p12password} letter={toApprove} user={this.props.user} onSuccess={() => {
                             Alert.success('Surat berhasil diapprove dan ditandatangani');
                             this.setState({ toApprove: null }, this.fetch.bind(this));
                         }} />}

@@ -31,12 +31,12 @@ export default class Division extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models } = this.props;
         const divisions = await models.Division.collection({
-            attributes: ['name', 'asst'],
+            attributes: ['name'],
             offset: (activePage * displayLength) - displayLength,
             limit: displayLength,
             where: {
                 name: {
-                    $iLike: `%${keyword}%`
+                    $iLike: `%${keyword}%` 
                 }
             },
             order: [['name', 'asc']]
@@ -83,10 +83,6 @@ export default class Division extends React.Component {
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Nama</Table.HeaderCell>
                             <Table.Cell dataKey="name" />
-                        </Table.Column>
-                        <Table.Column flexGrow={1}>
-                            <Table.HeaderCell>Keasistenan</Table.HeaderCell>
-                            <Table.Cell dataKey="asst" />
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Opsi</Table.HeaderCell>

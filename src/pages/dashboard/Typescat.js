@@ -3,6 +3,7 @@ import { Table, IconButton, Icon, Divider, InputGroup, Input, Modal, Button } fr
 import AddDivision from '../../components/forms/AddDivision';
 import EditDivision from '../../components/forms/EditDivision';
 import AddTypescat from '../../components/forms/AddTypescat';
+import EditTypescat from '../../components/forms/EditTypescat';
 
 export default class Typescat extends React.Component {
     state = {
@@ -136,7 +137,7 @@ export default class Typescat extends React.Component {
                         <Modal.Title>{selected && `Edit ${selected.name}`}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        {selected && <EditDivision {...this.props} division={selected} onSuccess={this.fetch.bind(this)} />}
+                        {selected && <EditTypescat {...this.props} typescat={selected} onSuccess={this.fetch.bind(this)} />}
                     </Modal.Body>
                 </Modal>
 

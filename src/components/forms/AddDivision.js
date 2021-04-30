@@ -4,8 +4,7 @@ import { Form, FormGroup, ControlLabel, FormControl, SelectPicker, Divider, Icon
 export default class AddDivision extends React.Component {
     state = {
         formValue: {
-            name: '',
-            asst: ''
+            name: ''
         },
         ready: false,
         loading: false
@@ -33,8 +32,7 @@ export default class AddDivision extends React.Component {
         this.setState({
             loading: false,
             formValue: {
-                name: '',
-                asst: ''
+                name: ''
             }
         }, () => {
             Alert.success('Dinas berhasil ditambah');
@@ -44,8 +42,7 @@ export default class AddDivision extends React.Component {
     render() {
         const { ready, formValue, divisions, loading } = this.state;
         const model = Schema.Model({
-            name: Schema.Types.StringType().isRequired('Isi nama'),
-            asst: Schema.Types.StringType().isRequired('Isi keasistenan'),
+            name: Schema.Types.StringType().isRequired('Isi nama')
         });
         return (
             <div>
@@ -60,14 +57,6 @@ export default class AddDivision extends React.Component {
                     <FormGroup>
                         <ControlLabel>Nama</ControlLabel>
                         <FormControl placeholder="nama" name="name" />
-                    </FormGroup>
-                    <FormGroup>
-                        <ControlLabel>Keasistenan</ControlLabel>
-                        <FormControl placeholder="keasistenan" accepter={SelectPicker} data={[
-                            'Asisten 1',
-                            'Asisten 2',
-                            'Asisten 3'
-                        ].map((r) => ({ label: r, value: r }))} name="asst" block />
                     </FormGroup>
                     <Divider />
                     <IconButton loading={loading} type="submit" color="blue" icon={<Icon icon="save" />} placement="left">Simpan</IconButton>

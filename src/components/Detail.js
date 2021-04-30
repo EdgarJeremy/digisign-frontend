@@ -36,7 +36,7 @@ export default class Detail extends React.Component {
                         </tr>
                         <tr>
                             <td>Posisi Dokumen</td>
-                            <td>{letter.position}</td>
+                            <td>{letter.Position.name}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -58,7 +58,7 @@ export default class Detail extends React.Component {
                             <tr key={i}>
                                 <td>{i + 1}</td>
                                 <td><Tag color={l.type === 'APPROVAL' ? 'green' : (l.type === 'REVISION' ? 'orange' : 'red')}>{l.type}</Tag></td>
-                                <td>{l.user.name}</td>
+                                <td>{l.user.name} ({l.user.role.name})</td>
                                 <td>{moment(l.created_at).format('MMMM Do YYYY, h:mm:ss a')}</td>
                                 <td>{l.note ? l.note : '-'}</td>
                                 <td>{l.type === 'REVISION' ? <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/log/${letter.id}/${l.id}`}>{letter.title}.docx</a> : '-'}</td>

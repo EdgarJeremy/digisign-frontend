@@ -43,7 +43,7 @@ export default class Login extends React.Component {
         return (
             ready ? <div className="login-container">
                 <div className="login-logo">
-                    <img src={require('../../images/e-tup.png')} />
+                    <img src={require('../../images/digisign.png')} />
                 </div>
                 <div className="login-card">
                     <Form onSubmit={this.onSubmit.bind(this)} fluid>
@@ -63,8 +63,9 @@ export default class Login extends React.Component {
                     </Form>
                 </div>
                 <div className="credit">
-                    Copyright &copy; {(new Date()).getFullYear()} Pemerintah Kabupaten Minahasa Tenggara <br />
-                    Photo by <a href="https://www.pexels.com/@tirachard-kumtanom-112571?utm_content=attributionCopyText&utm_medium=referral&utm_source=pexels">Tirachard Kumtanom</a> from Pexels
+                    Copyright &copy; {(new Date()).getFullYear()} MaesaLab <br />
+                    
+                    Photo by <a href="https://www.pexels.com/@goumbik">Lukas</a> from Pexels
                 </div>
             </div> :
                 <Loading />

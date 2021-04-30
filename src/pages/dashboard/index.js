@@ -12,6 +12,8 @@ import Rejected from './Rejected';
 import Approved from './Approved';
 import ChangePassword from '../../components/forms/ChangePassword';
 import Pass from './Pass';
+import Role from './Role';
+import Flow from './Flow';
 
 const MyLink = React.forwardRef((props, ref) => {
     const { to, ...rest } = props;
@@ -59,36 +61,6 @@ export default class Dashboard extends React.Component {
             ready ? <div>
                 <Container>
                     <Header style={{ backgroundColor: '#ffffff' }}>
-                        {/* <div className="contain subtle">
-                            <div className="dashboard-head">
-                                <center>
-                                    <img src={require('../../images/e-tup.png')} style={{ width: '20%'}} />
-                                </center>
-                                <div className="h-logo">
-                                    <img src={require('../../images/e-tup.png')} />
-                                </div>
-                                <div className="h-menu">
-                                    <div className="h-menu-item">
-                                        <Dropdown
-                                            renderTitle={(c) => (
-                                                <Avatar size="lg" circle>
-                                                    <Icon icon="user" />
-                                                </Avatar>
-                                            )}>
-                                            <Dropdown.Item><Icon icon="user" /> Ubah Password</Dropdown.Item>
-                                            <Dropdown.Item><Icon icon="sign-out" /> Logout</Dropdown.Item>
-                                        </Dropdown>
-                                    </div>
-                                    <div className="h-menu-item">
-                                        <div className="profile-detail">
-                                            <b>Edgar Pontoh</b><br />
-                                            <i>Administrator</i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <Divider style={{ margin: 0 }} /> */}
                         <div className="contain subtle">
                             <Navbar appearance="subtle">
                                 <Navbar.Body>
@@ -98,7 +70,9 @@ export default class Dashboard extends React.Component {
                                                 <Nav>
                                                     <NavLink active={this._currentRoute() === '/' || this._currentRoute() === ''} className="navlink" to={`${this.props.match.path}/`} icon={<Icon icon="peoples-map" />}> Dinas</NavLink>
                                                     <NavLink active={this._currentRoute() === '/users'} className="navlink" to={`${this.props.match.path}/users`} icon={<Icon icon="peoples" />}> Pengguna</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/roles'} className="navlink" to={`${this.props.match.path}/roles`} icon={<Icon icon="coincide" />}> Peran</NavLink>
                                                     <NavLink active={this._currentRoute() === '/typescat'} className="navlink" to={`${this.props.match.path}/typescat`} icon={<Icon icon="tag" />}> Tipe & Kategori</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/flow'} className="navlink" to={`${this.props.match.path}/flow`} icon={<Icon icon="flow" />}> Alur</NavLink>
                                                 </Nav>
                                             )
                                         } else if (user.type === 'SKPD') {
@@ -136,7 +110,9 @@ export default class Dashboard extends React.Component {
                                             <Switch>
                                                 <Route exact path={`${this.props.match.path}/`} render={(p) => (<Division {...p} models={this.props.models} />)} />
                                                 <Route exact path={`${this.props.match.path}/users`} render={(p) => (<User {...p} models={this.props.models} />)} />
+                                                <Route exact path={`${this.props.match.path}/roles`} render={(p) => (<Role {...p} models={this.props.models} />)} />
                                                 <Route exact path={`${this.props.match.path}/typescat`} render={(p) => (<Typescat {...p} models={this.props.models} />)} />
+                                                <Route exact path={`${this.props.match.path}/flow`} render={(p) => (<Flow {...p} models={this.props.models} />)} />
                                             </Switch>
                                         )
                                     } else if (user.type === 'SKPD') {

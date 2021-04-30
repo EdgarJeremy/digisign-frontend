@@ -8,6 +8,8 @@ export default class EditUser extends React.Component {
             username: '',
             password: '',
             type: '',
+            certificate_id: '',
+            role_id: '',
             division_id: ''
         },
         divisions: [],
@@ -17,9 +19,12 @@ export default class EditUser extends React.Component {
     async componentDidMount() {
         const { models, user } = this.props;
         const divisions = await models.Division.collection({ attributes: ['id', 'name'] });
+        const roles = await models.Role.collection({ attributes: ['id', 'name'] });
         setTimeout(() => {
             this.setState({
-                divisions: divisions.rows, ready: true, formValue: {
+                divisions: divisions.rows, ready: true,
+                roles: roles.rows,
+                formValue: {
                     ...user.$rawJSON,
                     password: ''
                 }
@@ -46,12 +51,14 @@ export default class EditUser extends React.Component {
         });
     }
     render() {
-        const { ready, formValue, divisions, loading } = this.state;
+        const { ready, formValue, divisions, roles, loading } = this.state;
         const model = Schema.Model({
             name: Schema.Types.StringType().isRequired('Isi nama'),
             username: Schema.Types.StringType().isRequired('Isi username'),
-            type: Schema.Types.StringType().isRequired('Isi peran'),
-            division_id: formValue.type === 'SKPD' ? Schema.Types.NumberType().isRequired('Isi dinas') : undefined
+            type: Schema.Types.StringType().isRequired('Isi tipe'),
+            certificate_id: Schema.Types.StringType(),
+            division_id: formValue.type === 'SKPD' ? Schema.Types.NumberType().isRequired('Isi dinas') : undefined,
+            role_id: Schema.Types.NumberType().isRequired('Isi peran')
         });
         return (
             <div>
@@ -76,18 +83,19 @@ export default class EditUser extends React.Component {
                         <FormControl placeholder="password (isi hanya jika ingin mengubah)" name="password" type="password" />
                     </FormGroup>
                     <FormGroup>
+                        <ControlLabel>ID Sertifikat</ControlLabel>
+                        <FormControl placeholder="ID sertifikat" name="certificate_id" />
+                    </FormGroup>
+                    <FormGroup>
                         <ControlLabel>Peran</ControlLabel>
-                        <FormControl placeholder="peran" accepter={SelectPicker} data={[
+                        <FormControl placeholder="peran" accepter={SelectPicker} data={roles.map((r) => ({ label: r.name, value: r.id }))} name="role_id" block />
+                    </FormGroup>
+                    <FormGroup>
+                        <ControlLabel>Tipe</ControlLabel>
+                        <FormControl placeholder="tipe" accepter={SelectPicker} data={[
                             'Administrator',
                             'SKPD',
-                            'Bagian Umum',
-                            'Bagian Hukum',
-                            'Asisten 1',
-                            'Asisten 2',
-                            'Asisten 3',
-                            'Sekretaris Daerah',
-                            'Wakil Bupati',
-                            'Bupati'
+                            'General'
                         ].map((r) => ({ label: r, value: r }))} name="type" block />
                     </FormGroup>
                     {formValue.type === 'SKPD' && <FormGroup>

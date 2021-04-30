@@ -1,11 +1,10 @@
 import React from 'react';
 import { Form, FormGroup, ControlLabel, FormControl, SelectPicker, Divider, IconButton, Icon, Schema, Loader, Alert } from 'rsuite';
 
-export default class AddTypescat extends React.Component {
+export default class EditTypescat extends React.Component {
     state = {
         formValue: {
-            name: '',
-            type: ''
+            name: ''
         },
         ready: false,
         loading: false
@@ -33,8 +32,7 @@ export default class AddTypescat extends React.Component {
         this.setState({
             loading: false,
             formValue: {
-                name: '',
-                type: ''
+                name: ''
             }
         }, () => {
             Alert.success('Kategori berhasil diedit');
@@ -44,8 +42,7 @@ export default class AddTypescat extends React.Component {
     render() {
         const { ready, formValue, loading } = this.state;
         const model = Schema.Model({
-            name: Schema.Types.StringType().isRequired('Isi nama'),
-            type: Schema.Types.StringType().isRequired('Isi tipe')
+            name: Schema.Types.StringType().isRequired('Isi nama')
         });
         return (
             <div>
@@ -60,13 +57,6 @@ export default class AddTypescat extends React.Component {
                     <FormGroup>
                         <ControlLabel>Nama</ControlLabel>
                         <FormControl placeholder="nama" name="name" />
-                    </FormGroup>
-                    <FormGroup>
-                        <ControlLabel>Tipe</ControlLabel>
-                        <FormControl placeholder="tipe" accepter={SelectPicker} data={[
-                            { l: 'Surat Biasa', v: 'Reguler' },
-                            { l: 'Produk Hukum', v: 'Hukum' }
-                        ].map((r) => ({ label: r.l, value: r.v }))} name="type" block />
                     </FormGroup>
                     <Divider />
                     <IconButton loading={loading} type="submit" color="blue" icon={<Icon icon="save" />} placement="left">Simpan</IconButton>

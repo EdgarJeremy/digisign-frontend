@@ -29,13 +29,17 @@ export default class List extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
-            attributes: ['title', 'number', 'type', 'position', 'category_id', 'updated_at'],
+            attributes: ['title', 'number', 'position_id', 'updated_at'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
             }, {
                 model: 'Log',
                 attributes: ['id', 'type']
+            }, {
+                model: 'Role',
+                as: 'Position',
+                attributes: ['id', 'name']
             }],
             offset: (activePage * displayLength) - displayLength,
             limit: displayLength,
@@ -95,14 +99,6 @@ export default class List extends React.Component {
                             <Table.Cell dataKey="title" />
                         </Table.Column>
                         <Table.Column flexGrow={1}>
-                            <Table.HeaderCell>Tipe</Table.HeaderCell>
-                            <Table.Cell>
-                                {(row) => {
-                                    return row.type === 'Reguler' ? 'Surat Biasa' : 'Produk Hukum';
-                                }}
-                            </Table.Cell>
-                        </Table.Column>
-                        <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Kategori</Table.HeaderCell>
                             <Table.Cell dataKey="category.name" />
                         </Table.Column>
@@ -117,15 +113,15 @@ export default class List extends React.Component {
                                                 this.onOpenFinal(row);
                                             }}>{row.title}.pdf</a>
                                         ) : (
-                                                <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}>{row.title}.docx</a>
-                                            )
+                                            <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}>{row.title}.docx</a>
+                                        )
                                     )
                                 }
                             </Table.Cell>
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Posisi Dokumen</Table.HeaderCell>
-                            <Table.Cell dataKey="position" />
+                            <Table.Cell dataKey="Position.name" />
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Status</Table.HeaderCell>

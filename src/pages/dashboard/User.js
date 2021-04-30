@@ -31,7 +31,7 @@ export default class User extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models } = this.props;
         const users = await models.User.collection({
-            attributes: ['name', 'username', 'type'],
+            attributes: ['name', 'username', 'type', 'role_id', 'certificate_id'],
             include: [{
                 attributes: ['name'],
                 model: 'Division'

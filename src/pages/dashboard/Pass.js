@@ -30,7 +30,7 @@ export default class Pass extends React.Component {
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
             distinct: true,
-            attributes: ['title', 'type', 'position', 'category_id', 'updated_at', 'division_id'],
+            attributes: ['title','updated_at', 'division_id'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
@@ -39,7 +39,7 @@ export default class Pass extends React.Component {
                 attributes: ['id', 'type']
             }, {
                 model: 'Division',
-                attributes: ['id', 'name', 'asst']
+                attributes: ['id', 'name', ]
             }],
             // offset: (activePage * displayLength) - displayLength,
             // limit: displayLength,
@@ -116,14 +116,6 @@ export default class Pass extends React.Component {
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Judul</Table.HeaderCell>
                             <Table.Cell dataKey="title" />
-                        </Table.Column>
-                        <Table.Column flexGrow={1}>
-                            <Table.HeaderCell>Tipe</Table.HeaderCell>
-                            <Table.Cell>
-                                {(row) => {
-                                    return row.type === 'Reguler' ? 'Surat Biasa' : 'Produk Hukum';
-                                }}
-                            </Table.Cell>
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>SKPD</Table.HeaderCell>

@@ -7,7 +7,7 @@ export default class Loading extends React.Component {
             <div className="etup-loading">
                 <div className="loading-img">
                     <div className="loading-fill"></div>
-                    <img src={require('../images/e-tup.png')} />
+                    <img src={require('../images/digisign.png')} />
                 </div>
                 <Loader size="md" content="Menghubungi server..."/>
             </div>

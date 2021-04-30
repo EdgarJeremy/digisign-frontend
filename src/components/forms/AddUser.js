@@ -8,17 +8,21 @@ export default class AddUser extends React.Component {
             username: '',
             password: '',
             type: '',
-            division_id: ''
+            certificate_id: '',
+            role_id: '',
+            division_id: undefined
         },
         divisions: [],
+        roles: [],
         ready: false,
         loading: false
     }
     async componentDidMount() {
         const { models } = this.props;
         const divisions = await models.Division.collection({ attributes: ['id', 'name'] });
+        const roles = await models.Role.collection({ attributes: ['id', 'name'] });
         setTimeout(() => {
-            this.setState({ divisions: divisions.rows, ready: true });
+            this.setState({ divisions: divisions.rows, roles: roles.rows, ready: true });
         }, 500);
     }
     handleChange(value) {
@@ -42,7 +46,9 @@ export default class AddUser extends React.Component {
                 username: '',
                 password: '',
                 type: '',
-                division_id: ''
+                certificate_id: '',
+                role_id: '',
+                division_id: undefined
             }
         }, () => {
             Alert.success('Pengguna berhasil ditambah');
@@ -50,13 +56,16 @@ export default class AddUser extends React.Component {
         });
     }
     render() {
-        const { ready, formValue, divisions, loading } = this.state;
+        const { ready, formValue, divisions, roles, loading } = this.state;
         const model = Schema.Model({
             name: Schema.Types.StringType().isRequired('Isi nama'),
             username: Schema.Types.StringType().isRequired('Isi username'),
             password: Schema.Types.StringType().isRequired('Isi password'),
-            type: Schema.Types.StringType().isRequired('Isi peran'),
-            division_id: formValue.type === 'SKPD' ? Schema.Types.NumberType().isRequired('Isi dinas') : undefined
+            type: Schema.Types.StringType().isRequired('Isi tipe'),
+            certificate_id: Schema.Types.StringType(),
+            type: Schema.Types.StringType().isRequired('Isi tipe'),
+            division_id: formValue.type === 'SKPD' ? Schema.Types.NumberType().isRequired('Isi dinas') : undefined,
+            role_id: Schema.Types.NumberType().isRequired('Isi peran')
         });
         return (
             <div>
@@ -81,18 +90,19 @@ export default class AddUser extends React.Component {
                         <FormControl placeholder="password" name="password" type="password" />
                     </FormGroup>
                     <FormGroup>
+                        <ControlLabel>ID Sertifikat</ControlLabel>
+                        <FormControl placeholder="ID sertifikat" name="certificate_id" />
+                    </FormGroup>
+                    <FormGroup>
                         <ControlLabel>Peran</ControlLabel>
-                        <FormControl placeholder="peran" accepter={SelectPicker} data={[
+                        <FormControl placeholder="peran" accepter={SelectPicker} data={roles.map((r) => ({ label: r.name, value: r.id }))} name="role_id" block />
+                    </FormGroup>
+                    <FormGroup>
+                        <ControlLabel>Tipe</ControlLabel>
+                        <FormControl placeholder="tipe" accepter={SelectPicker} data={[
                             'Administrator',
                             'SKPD',
-                            'Bagian Umum',
-                            'Bagian Hukum',
-                            'Asisten 1',
-                            'Asisten 2',
-                            'Asisten 3',
-                            'Sekretaris Daerah',
-                            'Wakil Bupati',
-                            'Bupati'
+                            'General'
                         ].map((r) => ({ label: r, value: r }))} name="type" block />
                     </FormGroup>
                     {formValue.type === 'SKPD' && <FormGroup>
