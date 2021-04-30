@@ -75,27 +75,22 @@ export default class Dashboard extends React.Component {
                                                     <NavLink active={this._currentRoute() === '/flow'} className="navlink" to={`${this.props.match.path}/flow`} icon={<Icon icon="flow" />}> Alur</NavLink>
                                                 </Nav>
                                             )
-                                        } else if (user.type === 'SKPD') {
-                                            return (
-                                                <Nav>
-                                                    <NavLink active={this._currentRoute() === '/' || this._currentRoute() === ''} className="navlink" to={`${this.props.match.path}/`} icon={<Icon icon="envelope" />}> Buat Surat</NavLink>
-                                                    <NavLink active={this._currentRoute() === '/list'} className="navlink" to={`${this.props.match.path}/list`} icon={<Icon icon="envelope-open" />}> Daftar Surat</NavLink>
-                                                    <NavLink active={this._currentRoute() === '/rejected'} className="navlink" to={`${this.props.match.path}/rejected`} icon={<Icon icon="envelope-o" />}> Surat Ditolak</NavLink>
-                                                </Nav>
-                                            )
                                         } else {
                                             return (
                                                 <Nav>
-                                                    <NavLink active={this._currentRoute() === '/' || this._currentRoute() === ''} className="navlink" to={`${this.props.match.path}/`} icon={<Icon icon="envelope" />}> Surat Masuk</NavLink>
-                                                    {this.state.user.type !== 'Bupati' && <NavLink active={this._currentRoute() === '/pass'} className="navlink" to={`${this.props.match.path}/pass`} icon={<Icon icon="envelope-open" />}> Surat Diapprove</NavLink>}
-                                                    {this.state.user.type === 'Bupati' && <NavLink active={this._currentRoute() === '/approved'} className="navlink" to={`${this.props.match.path}/approved`} icon={<Icon icon="envelope-open" />}> Surat Diapprove</NavLink>}
+                                                    <NavLink active={this._currentRoute() === '/' || this._currentRoute() === ''} className="navlink" to={`${this.props.match.path}/`} icon={<Icon icon="envelope" />}> Buat Surat</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/list'} className="navlink" to={`${this.props.match.path}/list`} icon={<Icon icon="envelope-open" />}> Surat Dibuat</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/inbox'} className="navlink" to={`${this.props.match.path}/inbox`} icon={<Icon icon="envelope-o" />}> Surat Masuk</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/rejected'} className="navlink" to={`${this.props.match.path}/rejected`} icon={<Icon icon="envelope-o" />}> Surat Ditolak</NavLink>
+                                                    <NavLink active={this._currentRoute() === '/approved'} className="navlink" to={`${this.props.match.path}/approved`} icon={<Icon icon="envelope-open" />}> Surat Diapprove</NavLink>
+                                                    {/* <NavLink active={this._currentRoute() === '/approved'} className="navlink" to={`${this.props.match.path}/approved`} icon={<Icon icon="envelope-open" />}> Surat Diapprove</NavLink> */}
                                                 </Nav>
                                             )
                                         }
                                     })()}
                                     <Nav pullRight>
                                         <Nav.Item onClick={() => this.setState({ openEditPass: true })} icon={<Icon icon="lock" />} >Ganti Password</Nav.Item>
-                                        <Nav.Item onClick={this.onLogout.bind(this)} icon={<Icon icon="sign-out" />} >Logout ({user.name} - {user.type === 'SKPD' ? user.division.name : user.type})</Nav.Item>
+                                        <Nav.Item onClick={this.onLogout.bind(this)} icon={<Icon icon="sign-out" />} >Logout</Nav.Item>
                                     </Nav>
                                 </Navbar.Body>
                             </Navbar>
@@ -103,6 +98,9 @@ export default class Dashboard extends React.Component {
                     </Header>
                     <Container>
                         <Content>
+                            <div style={{maxWidth: 1200, margin: '0 auto', padding: 14}}>
+                                <h4>Hai, {user.name}</h4>
+                            </div>
                             {
                                 (() => {
                                     if (user.type === 'Administrator') {
@@ -115,20 +113,15 @@ export default class Dashboard extends React.Component {
                                                 <Route exact path={`${this.props.match.path}/flow`} render={(p) => (<Flow {...p} models={this.props.models} />)} />
                                             </Switch>
                                         )
-                                    } else if (user.type === 'SKPD') {
+                                    } else {
                                         return (
                                             <Switch>
                                                 <Route exact path={`${this.props.match.path}/`} render={(p) => (<New {...p} models={this.props.models} user={this.state.user} />)} />
                                                 <Route path={`${this.props.match.path}/list`} render={(p) => (<List {...p} models={this.props.models} user={this.state.user} />)} />
                                                 <Route path={`${this.props.match.path}/rejected`} render={(p) => (<Rejected {...p} models={this.props.models} user={this.state.user} />)} />
-                                            </Switch>
-                                        )
-                                    } else {
-                                        return (
-                                            <Switch>
-                                                <Route exact path={`${this.props.match.path}/`} render={(p) => (<Inbox {...p} models={this.props.models} user={this.state.user} />)} />
-                                                {this.state.user.type !== 'Bupati' && <Route path={`${this.props.match.path}/pass`} render={(p) => (<Pass {...p} models={this.props.models} user={this.state.user} />)} />}
-                                                {this.state.user.type === 'Bupati' && <Route path={`${this.props.match.path}/approved`} render={(p) => (<Approved {...p} models={this.props.models} user={this.state.user} />)} />}
+                                                <Route path={`${this.props.match.path}/inbox`} render={(p) => (<Inbox {...p} models={this.props.models} user={this.state.user} />)} />
+                                                {/* <Route path={`${this.props.match.path}/pass`} render={(p) => (<Pass {...p} models={this.props.models} user={this.state.user} />)} /> */}
+                                                <Route path={`${this.props.match.path}/approved`} render={(p) => (<Approved {...p} models={this.props.models} user={this.state.user} />)} />
                                             </Switch>
                                         )
                                     }

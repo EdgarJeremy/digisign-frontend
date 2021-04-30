@@ -71,28 +71,14 @@ export default class Rejected extends React.Component {
         const { user, models } = this.props;
         const { revisionFiles } = this.state;
         const confirmed = window.confirm(`Anda yakin akan mengirim lagi?`);
-        let nextPos;
-        if (confirmed) {
-            if (item.position === 'Bagian Umum' || item.position === 'Bagian Hukum') {
-                nextPos = item.division.asst;
-            } else if (item.position === 'SKPD') {
-                nextPos = item.type === 'Reguler' ? 'Bagian Umum' : 'Bagian Hukum';
-            } else {
-                nextPos = structure[structure.indexOf(item.position) + 1];
-            }
-            if (nextPos) {
-                await item.update({ position: nextPos, file: revisionFiles[`file-${item.id}`] });
-                await models.Log.create({
-                    type: 'APPROVAL',
-                    note: '',
-                    user_id: user.id,
-                    letter_id: item.id
-                });
-            } else {
-                // todo : done
-            }
-            await this.fetch();
-        }
+        await item.update({ position_id: 'next', file: revisionFiles[`file-${item.id}`] });
+        await models.Log.create({
+            type: 'APPROVAL',
+            note: '',
+            user_id: user.id,
+            letter_id: item.id
+        });
+        await this.fetch();
     }
     async onRevise(e, item) {
         const file = e.target.files[0];

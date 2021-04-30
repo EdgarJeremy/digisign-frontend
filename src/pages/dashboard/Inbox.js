@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Icon, Divider, InputGroup, Input, Modal, Alert } from 'rsuite';
+import { Table, Icon, Divider, InputGroup, Input, Modal, Alert, Button } from 'rsuite';
 import Signer from '../../components/Signer';
 
 const structure = ['SKPD', 'Bagian Umum', 'Bagian Hukum', 'Sekretaris Daerah', 'Wakil Bupati', 'Bupati'];
@@ -13,6 +13,7 @@ export default class Inbox extends React.Component {
         loading: true,
         revisionFiles: {},
         toApprove: null,
+        passwordModal: false,
         p12password: ''
     }
     async componentDidMount() {
@@ -47,6 +48,9 @@ export default class Inbox extends React.Component {
                     $iLike: `%${keyword}%`
                 },
                 position_id: user.role_id,
+                user_id: {
+                    $ne: user.id
+                },
                 number: null
             },
             order: [['created_at', 'desc']]
@@ -75,17 +79,18 @@ export default class Inbox extends React.Component {
                 await this.fetch();
             }
         } else {
-            let p12password = prompt('Masukkan password tanda tangan elektronik untuk melanjutkan');
-            if (p12password) {
-                this.setState({ toApprove: item, p12password });
-            }
+            this.setState({ toApprove: item, passwordModal: true });
+            // let p12password = prompt('Masukkan password tanda tangan elektronik untuk melanjutkan');
+            // if (p12password) {
+            //     this.setState({ toApprove: item, p12password });
+            // }
         }
     }
     async onReject(item) {
         const { user, models } = this.props;
         const reason = window.prompt(`Masukkan alasan penolakan`);
         if (reason !== null) {
-            await item.update({ position: 'previous' });
+            await item.update({ position_id: 'reject' });
             await models.Log.create({
                 type: 'REJECTION',
                 note: reason,
@@ -114,7 +119,7 @@ export default class Inbox extends React.Component {
         }
     }
     render() {
-        const { keyword, letters, loading, activePage, displayLength, toApprove, p12password } = this.state;
+        const { keyword, letters, loading, activePage, displayLength, toApprove, p12password, passwordModal } = this.state;
         const { user } = this.props;
         const { REACT_APP_API_HOST, REACT_APP_API_PORT } = process.env;
         return (
@@ -203,7 +208,7 @@ export default class Inbox extends React.Component {
                     />
                 </div>
 
-                <Modal show={!!toApprove} onHide={() => this.setState({ toApprove: null })} size="lg">
+                <Modal show={!!toApprove && !!p12password} onHide={() => this.setState({ toApprove: null, p12password: '' })} size="lg">
                     <Modal.Header>
                         <Modal.Title>Approve dan Tanda tangani</Modal.Title>
                     </Modal.Header>
@@ -213,6 +218,18 @@ export default class Inbox extends React.Component {
                             this.setState({ toApprove: null }, this.fetch.bind(this));
                         }} />}
                     </Modal.Body>
+                </Modal>
+
+                <Modal show={!!passwordModal} onHide={() => this.setState({ passwordModal: null })} size="xs">
+                    <Modal.Header>
+                        <Modal.Title>Masukkan password tanda tangan elektronik</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body style={{ maxHeight: 'auto' }}>
+                        <Input type="password" inputRef={(e) => this._iP12 = e} placeholder="password" />
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={() => this.setState({ p12password: this._iP12.value, passwordModal: false })}>Konfirmasi</Button>
+                    </Modal.Footer>
                 </Modal>
             </div>
         )

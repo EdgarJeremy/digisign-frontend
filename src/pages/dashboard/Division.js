@@ -61,7 +61,7 @@ export default class Division extends React.Component {
     render() {
         const { keyword, divisions, loading, activePage, displayLength, showAddModal, showEditModal, showDeleteModal, toDelete, selected, deleteLoading } = this.state;
         return (
-            <div className="contain" style={{ padding: 14 }}>
+            <div className="contain" style={{ padding: 14, paddingTop: 0 }}>
                 <h3>Dinas</h3>
                 <div className="panel">
                     <div className="panel-toolbar">

@@ -29,7 +29,7 @@ export default class Approved extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
-            attributes: ['title', 'type', 'position', 'category_id', 'updated_at'],
+            attributes: ['title', 'updated_at'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
@@ -45,7 +45,8 @@ export default class Approved extends React.Component {
                 },
                 number: {
                     $ne: null
-                }
+                },
+                user_id: user.id
             },
             order: [['updated_at', 'desc']]
         });
