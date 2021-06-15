@@ -30,7 +30,7 @@ export default class Inbox extends React.Component {
         const { activePage, displayLength, keyword } = this.state;
         const { models, user } = this.props;
         const letters = await models.Letter.collection({
-            attributes: ['title', 'position_id'],
+            attributes: ['title', 'position_id', 'signatures_pos'],
             include: [{
                 model: 'Category',
                 attributes: ['id', 'name']
@@ -80,10 +80,6 @@ export default class Inbox extends React.Component {
             }
         } else {
             this.setState({ toApprove: item, passwordModal: true });
-            // let p12password = prompt('Masukkan password tanda tangan elektronik untuk melanjutkan');
-            // if (p12password) {
-            //     this.setState({ toApprove: item, p12password });
-            // }
         }
     }
     async onReject(item) {
@@ -117,6 +113,58 @@ export default class Inbox extends React.Component {
                 this.setState({ revisionFiles });
             }
         }
+    }
+    async onSign(letter, signature) {
+        const { region, page, img } = signature;
+        const { p12password } = this.state;
+        this.setState({ loading: true });
+        const x = (region.x / 100) * img.width;
+        const y = (region.y / 100) * img.height;
+        const w = (region.width / 100) * img.width;
+        const h = (region.height / 100) * img.height;
+        const res = await letter.$http(`letters/${letter.id}/sign`, 'POST', {
+            body: {
+                page: page,
+                sigbox: [
+                    x,
+                    // flip y axis & minus that result to the height of the graphics to shift the graphics down
+                    (img.height - y) - h,
+                    w,
+                    h
+                ],
+                p12password
+            }
+        });
+        if (res.headers['x-access-token'] && res.headers['x-refresh-token']) {
+            localStorage.setItem('app_accessToken', res.headers['x-access-token']);
+            localStorage.setItem('app_refreshToken', res.headers['x-refresh-token']);
+        }
+    }
+    async onDone(letter) {
+        Alert.info('Menandatangani surat...', 0);
+        for (let i = 0; i < letter.signatures_pos.length; i++) {
+            await this.onSign(letter, letter.signatures_pos[i]);
+        }
+        Alert.closeAll();
+        Alert.info('Mengapprove surat..');
+        const { models, user } = this.props;
+        this.setState({ loading: true });
+        const res = await letter.$http(`letters/${letter.id}/approve`, 'POST', {
+            body: {
+            }
+        });
+        if (res.headers['x-access-token'] && res.headers['x-refresh-token']) {
+            localStorage.setItem('app_accessToken', res.headers['x-access-token']);
+            localStorage.setItem('app_refreshToken', res.headers['x-refresh-token']);
+        }
+        await models.Log.create({
+            type: 'APPROVAL',
+            note: '',
+            user_id: user.id,
+            letter_id: letter.id
+        });
+        Alert.success('Surat berhasil ditandatangani dan diapprove..');
+        this.fetch();
     }
     render() {
         const { keyword, letters, loading, activePage, displayLength, toApprove, p12password, passwordModal } = this.state;
@@ -208,7 +256,7 @@ export default class Inbox extends React.Component {
                     />
                 </div>
 
-                <Modal show={!!toApprove && !!p12password} onHide={() => this.setState({ toApprove: null, p12password: '' })} size="lg">
+                {/* <Modal show={!!toApprove && !!p12password} onHide={() => this.setState({ toApprove: null, p12password: '' })} size="lg">
                     <Modal.Header>
                         <Modal.Title>Approve dan Tanda tangani</Modal.Title>
                     </Modal.Header>
@@ -218,7 +266,7 @@ export default class Inbox extends React.Component {
                             this.setState({ toApprove: null }, this.fetch.bind(this));
                         }} />}
                     </Modal.Body>
-                </Modal>
+                </Modal> */}
 
                 <Modal show={!!passwordModal} onHide={() => this.setState({ passwordModal: null })} size="xs">
                     <Modal.Header>
@@ -228,7 +276,7 @@ export default class Inbox extends React.Component {
                         <Input type="password" inputRef={(e) => this._iP12 = e} placeholder="password" />
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button onClick={() => this.setState({ p12password: this._iP12.value, passwordModal: false })}>Konfirmasi</Button>
+                        <Button onClick={() => this.setState({ p12password: this._iP12.value, passwordModal: false }, () => this.onDone(toApprove))}>Konfirmasi</Button>
                     </Modal.Footer>
                 </Modal>
             </div>

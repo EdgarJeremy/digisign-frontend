@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import StepWizard from 'react-step-wizard';
-import { Button, Divider, ButtonGroup, Input, Steps, Icon, IconButton, SelectPicker, Loader, Alert } from 'rsuite';
+import { Button, Divider, ButtonGroup, Input, Steps, Icon, IconButton, SelectPicker, Loader, Alert, Modal, Tag } from 'rsuite';
+import SignerTemp from '../../components/SignerTemp';
 
 export default class New extends React.Component {
     state = {
@@ -11,6 +12,7 @@ export default class New extends React.Component {
             category_id: '',
             flow_id: '',
         },
+        tempFile: null,
         categories: [],
         flows: [],
         ready: false,
@@ -27,11 +29,23 @@ export default class New extends React.Component {
         form[key] = val;
         this.setState({ form });
     }
-    async onSubmit() {
+    uploadTemp(base64) {
+        const { models } = this.props;
+        models.Letter.$http('letters/upload_temp', 'POST', {
+            body: {
+                file: base64
+            }
+        }).then((res) => {
+            console.log(res);
+            this.setState({ tempFile: res.data.data });
+        }).catch((err) => console.log(err));
+    }
+    async onSubmit(signatures) {
         const { models, user } = this.props;
         const { form } = this.state;
         this.setState({ loading: true });
         delete form.category;
+        form.signatures_pos = signatures;
         const letter = await models.Letter.create(form);
         await models.Log.create({
             type: 'APPROVAL',
@@ -58,6 +72,7 @@ export default class New extends React.Component {
         return;
     }
     render() {
+        const { models } = this.props;
         const { form, ready, categories, flows, loading } = this.state;
         form.category = this.findCategory(form.category_id);
         return (
@@ -68,8 +83,8 @@ export default class New extends React.Component {
                         <Step1 formData={form} flows={flows} updateForm={this.updateForm.bind(this)} />
                         <Step2 formData={form} categories={categories} updateForm={this.updateForm.bind(this)} />
                         <Step3 formData={form} updateForm={this.updateForm.bind(this)} />
-                        <Step4 formData={form} updateForm={this.updateForm.bind(this)} />
-                        <Step5 formData={form} updateForm={this.updateForm.bind(this)} onSubmit={this.onSubmit.bind(this)} loading={loading} />
+                        <Step4 formData={form} updateForm={this.updateForm.bind(this)} uploadTemp={this.uploadTemp.bind(this)} />
+                        <Step5 formData={form} updateForm={this.updateForm.bind(this)} models={models} tempFile={this.state.tempFile} onSubmit={this.onSubmit.bind(this)} loading={loading} />
                     </StepWizard> : <div style={{ textAlign: 'center' }}><Loader size="md" /></div>}
                 </div>
             </div>
@@ -161,6 +176,7 @@ const Step4 = (props) => {
                                 data: reader.result,
                                 meta: file
                             });
+                            props.uploadTemp(reader.result);
                         }
                     }
                 }} />
@@ -174,6 +190,7 @@ const Step4 = (props) => {
     )
 }
 const Step5 = (props) => {
+    const [modal, setModal] = useState(false);
     return (
         <div>
             <h4>Tinjau pengisian</h4><br />
@@ -193,7 +210,7 @@ const Step5 = (props) => {
                     </tr>
                     <tr>
                         <td>File</td>
-                        <td>{props.formData.file?.meta.name}</td>
+                        <td><Tag color={props.tempFile ? 'green' : 'red'}>{props.formData.file?.meta.name}</Tag> {!props.tempFile ? <Loader /> : null}</td>
                     </tr>
                 </tbody>
             </table>
@@ -204,11 +221,24 @@ const Step5 = (props) => {
             <div className="wizard-action">
                 <IconButton onClick={props.previousStep} icon={<Icon icon="angle-left" />} appearance="primary" size="lg" circle />
                 <Divider vertical />
-                <IconButton loading={props.loading} onClick={async () => {
-                    await props.onSubmit();
-                    props.goToStep(1);
+                <IconButton disabled={!props.tempFile} loading={props.loading} onClick={async () => {
+                    setModal(true);
                 }} icon={<Icon icon="check" />} appearance="primary" size="lg" circle />
             </div>
+
+
+            <Modal show={modal} onHide={() => setModal(false)} size="lg">
+                <Modal.Header>
+                    <Modal.Title>Tandai lokasi tanda tangan</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ maxHeight: 'auto' }}>
+                    {props.tempFile && <SignerTemp models={props.models} id={props.tempFile} onDone={async (signatures) => {
+                        setModal(false);
+                        await props.onSubmit(signatures);
+                        props.goToStep(1);
+                    }} />}
+                </Modal.Body>
+            </Modal>
         </div>
     )
 }
