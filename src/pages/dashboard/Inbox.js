@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Icon, Divider, InputGroup, Input, Modal, Alert, Button } from 'rsuite';
-import Signer from '../../components/Signer';
+import Viewer from '../../components/Viewer';
 
 const structure = ['SKPD', 'Bagian Umum', 'Bagian Hukum', 'Sekretaris Daerah', 'Wakil Bupati', 'Bupati'];
 
@@ -13,6 +13,7 @@ export default class Inbox extends React.Component {
         loading: true,
         revisionFiles: {},
         toApprove: null,
+        toPreview: null,
         passwordModal: false,
         p12password: ''
     }
@@ -166,8 +167,11 @@ export default class Inbox extends React.Component {
         Alert.success('Surat berhasil ditandatangani dan diapprove..');
         this.fetch();
     }
+    onOpenPreview(row) {
+        this.setState({ toPreview: row });
+    }
     render() {
-        const { keyword, letters, loading, activePage, displayLength, toApprove, p12password, passwordModal } = this.state;
+        const { keyword, letters, loading, activePage, displayLength, toApprove, toPreview, passwordModal } = this.state;
         const { user } = this.props;
         const { REACT_APP_API_HOST, REACT_APP_API_PORT } = process.env;
         return (
@@ -190,7 +194,14 @@ export default class Inbox extends React.Component {
                         data={!loading ? letters.rows : []}>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Judul</Table.HeaderCell>
-                            <Table.Cell dataKey="title" />
+                            <Table.Cell>
+                                {(row) => (
+                                    <a href="#" onClick={(e) => {
+                                        e.preventDefault();
+                                        this.onOpenPreview(row);
+                                    }}>{row.title}</a>
+                                )}
+                            </Table.Cell>
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Pemohon</Table.HeaderCell>
@@ -207,7 +218,11 @@ export default class Inbox extends React.Component {
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>File Dokumen</Table.HeaderCell>
                             <Table.Cell>
-                                {(row) => <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}>{row.title}.docx</a>}
+                                {
+                                    (row) => (
+                                        <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}><Icon icon="download" /> download</a>
+                                    )
+                                }
                             </Table.Cell>
                         </Table.Column>
                         {user.type === 'Bupati' || user.type === 'Wakil Bupati' ? '' : <Table.Column flexGrow={1}>
@@ -277,6 +292,20 @@ export default class Inbox extends React.Component {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button onClick={() => this.setState({ p12password: this._iP12.value, passwordModal: false }, () => this.onDone(toApprove))}>Konfirmasi</Button>
+                    </Modal.Footer>
+                </Modal>
+
+                <Modal show={!!toPreview} onHide={() => this.setState({ toPreview: null })} size="lg">
+                    <Modal.Header>
+                        <Modal.Title>{toPreview && toPreview.title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body style={{ maxHeight: 'none' }}>
+                        <div style={{ width: '100%' }}>
+                            {toPreview && <Viewer final={!!toPreview.number} id={toPreview.id} />}
+                        </div>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={() => this.setState({ toPreview: null })} appearance="subtle">Tutup</Button>
                     </Modal.Footer>
                 </Modal>
             </div>

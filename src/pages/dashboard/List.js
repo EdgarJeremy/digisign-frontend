@@ -71,7 +71,7 @@ export default class List extends React.Component {
     onDetail(item) {
         this.setState({ selected: item });
     }
-    onOpenFinal(row) {
+    onOpenPreview(row) {
         this.setState({ toPreview: row });
     }
     render() {
@@ -96,7 +96,14 @@ export default class List extends React.Component {
                         data={!loading ? letters.rows : []}>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Judul</Table.HeaderCell>
-                            <Table.Cell dataKey="title" />
+                            <Table.Cell>
+                                {(row) => (
+                                    <a href="#" onClick={(e) => {
+                                        e.preventDefault();
+                                        this.onOpenPreview(row);
+                                    }}>{row.title}</a>
+                                )}
+                            </Table.Cell>
                         </Table.Column>
                         <Table.Column flexGrow={1}>
                             <Table.HeaderCell>Kategori</Table.HeaderCell>
@@ -107,14 +114,7 @@ export default class List extends React.Component {
                             <Table.Cell>
                                 {
                                     (row) => (
-                                        row.number ? (
-                                            <a href="#" onClick={(e) => {
-                                                e.preventDefault();
-                                                this.onOpenFinal(row);
-                                            }}>{row.title}.pdf</a>
-                                        ) : (
-                                            <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}>{row.title}.docx</a>
-                                        )
+                                        <a target="_blank" href={`${REACT_APP_API_HOST}:${REACT_APP_API_PORT}/document/${row.id}`}><Icon icon="download" /> download</a>
                                     )
                                 }
                             </Table.Cell>
@@ -219,7 +219,7 @@ export default class List extends React.Component {
                     </Modal.Header>
                     <Modal.Body style={{ maxHeight: 'none' }}>
                         <div style={{ width: '100%' }}>
-                            {toPreview && <Viewer id={toPreview.id} />}
+                            {toPreview && <Viewer final={!!toPreview.number} id={toPreview.id} />}
                         </div>
                     </Modal.Body>
                     <Modal.Footer>
